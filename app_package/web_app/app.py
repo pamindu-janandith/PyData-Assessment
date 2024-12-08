@@ -10,6 +10,11 @@ from utilities import get_data_frame
 frame = get_data_frame()
 countries = frame['Country'].unique()
 
+def get_frame_by_wine_name(frame, name):
+    df = pd.DataFrame(frame)
+    df = df[df['Name'] == name]
+    return df
+
 def region_selection_by_country(frame, country):
     df = pd.DataFrame(frame)
     df = df[df['Country'] == country]
@@ -29,6 +34,8 @@ def df_selection_by_country_and_region_and_wine_style(frame, country, region, wi
     return df
 
 df_of_one_region = region_selection_by_country(frame, countries[0])
+wines = df_of_one_region['Name'].unique()
+
 regions = df_of_one_region['Region'].str.split(' / ').apply(lambda x: x[1] if len(x) > 1 else None).unique()
 
 df_of_one_region_one_wine_style = wine_style_selection_by_country_and_region(frame, countries[0], regions[0])
@@ -117,7 +124,6 @@ app.layout = html.Div(
                                 for wine_style in wine_styles
                             ],
                             value = wine_styles[0],
-                            clearable=False,
                             searchable=False,
                             className="dropdown",
                         ),
@@ -153,15 +159,56 @@ app.layout = html.Div(
                 html.Div(
                     children=dcc.Graph(
                         id="BTSA-chart",
-                        
+
                     ),
                     className="card",
                 ),
             ],
             className="wrapper",
         ),
+        html.Div(
+            children=[
+                html.Div(children="Wine search in Country", className="menu-title"),
+                    dcc.Dropdown(
+                        id="wine-search",
+                        options=[
+                            {
+                                "label": wine,
+                                "value": wine,
+                            }
+                            for wine in wines
+                        ],
+                        value = None,
+                        searchable=True,
+                        className="dropdown",
+                    ),
+                html.Div(id='wine-search-output')
+            ],
+        ),
     ]
 )
+
+@app.callback(
+    Output("wine-search", "options"),
+    Input("country-filter", "value")
+)
+def update_region_options(selected_country):
+    if selected_country:
+        df_of_one_region = region_selection_by_country(frame, selected_country)
+        wines = df_of_one_region['Name'].unique()
+        return [{"label": wine, "value": wine} for wine in wines]
+    return []
+
+@callback(
+    Output('wine-search-output', 'children'),
+    Input('wine-search', 'value')
+)
+def update_wine_search_output(value):
+    df = get_frame_by_wine_name(frame, value)
+    return f'{df["Name"], df["Rating"] ,df["Number of Ratings"], df["Region"], df["Winery"], df["Wine style"],
+    df["Alcohol content"], df["Grapes"] ,df["Food pairings"],
+    df["Bold"], df["Tannin"] ,df["Sweet"], df["Acidic"]}'
+
 @app.callback(
     Output("region-filter", "options"),
     Input("country-filter", "value")
@@ -204,9 +251,7 @@ def clear_wine_style_on_country_change(_):
     Input("wine-style-filter", "value"),
 )
 def update_charts(country, region, wine_style):
-    # filtered_data = frame.query(
-    #     "Country == @country"
-    # )
+    
     filtered_data = df_selection_by_country_and_region_and_wine_style(frame, country, region, wine_style)
 
     # price_chart_figure = {

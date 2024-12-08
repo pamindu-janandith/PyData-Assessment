@@ -162,6 +162,39 @@ app.layout = html.Div(
         ),
     ]
 )
+@app.callback(
+    Output("region-filter", "options"),
+    Input("country-filter", "value")
+)
+def update_region_options(selected_country):
+    if selected_country:
+        df_of_one_region = region_selection_by_country(frame, selected_country)
+        regions = df_of_one_region['Region'].str.split(' / ').apply(lambda x: x[1] if len(x) > 1 else None).unique()
+        regions = [region for region in regions if pd.notna(region)]
+        return [{"label": region, "value": region} for region in regions]
+    return []
+
+@app.callback(
+    Output("wine-style-filter", "options"),
+    Input("country-filter", "value"),
+    Input("region-filter", "value")
+)
+def update_wine_style_options(country, region ):
+    if country:
+        df_of_one_region_one_wine_style = wine_style_selection_by_country_and_region(frame, country, region)
+        wine_styles = df_of_one_region_one_wine_style['Wine style'].unique()
+        wine_styles = [style for style in wine_styles if pd.notna(style)]
+        return [{"label": wine_style, "value": wine_style} for wine_style in wine_styles]
+    return []
+
+# Callback to clear wine style dropdown when country is changed
+@app.callback(
+    Output("region-filter", "value"),
+    Output("wine-style-filter", "value"),
+    Input("country-filter", "value")
+)
+def clear_wine_style_on_country_change(_):
+    return None, None
 
 @app.callback(
     # Output("price-chart", "figure"),

@@ -1,19 +1,15 @@
 import pandas as pd
-from dash import Dash, Input, Output, dcc, html, callback
-import glob, os
-import plotly.graph_objs as go
+from dash import Dash, Input, Output, dcc, html
+import os
 import sys
-sys.path.append("../utils/")
+
+# Add the utils folder to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../utils/")))
 
 from utilities import get_data_frame
 
 frame = get_data_frame()
 countries = frame['Country'].unique()
-
-def get_frame_by_wine_name(frame, name):
-    df = pd.DataFrame(frame)
-    df = df[df['Name'] == name]
-    return df
 
 def region_selection_by_country(frame, country):
     df = pd.DataFrame(frame)
@@ -34,180 +30,101 @@ def df_selection_by_country_and_region_and_wine_style(frame, country, region, wi
     return df
 
 df_of_one_region = region_selection_by_country(frame, countries[0])
-wines = df_of_one_region['Name'].unique()
-
 regions = df_of_one_region['Region'].str.split(' / ').apply(lambda x: x[1] if len(x) > 1 else None).unique()
 
 df_of_one_region_one_wine_style = wine_style_selection_by_country_and_region(frame, countries[0], regions[0])
 wine_styles = df_of_one_region_one_wine_style['Wine style'].unique()
 wine_styles = [style for style in wine_styles if pd.notna(style)]
 
+# Include Bootstrap styles
 external_stylesheets = [
-    {
-        "href": (
-            "https://fonts.googleapis.com/css2?"
-            "family=Lato:wght@400;700&display=swap"
-        ),
-        "rel": "stylesheet",
-    },
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
 ]
 app = Dash(__name__, external_stylesheets=external_stylesheets)
-app.title = "PyData Assessment"
+app.title = "Wine Analytics"
 
 app.layout = html.Div(
+    className="container mt-5",
     children=[
         html.Div(
+            className="text-center mb-4",
             children=[
-                html.P(children="🍷", className="header-emoji"),
-                html.H1(
-                    children="Wine Analytics", className="header-title"
-                ),
+                html.P(children="🍷", className="fs-1"),
+                html.H1(children="Wine Analytics", className="display-4 fw-bold"),
                 html.P(
-                    children=(
-                        "Analyze the behavior of avocado prices and the number"
-                        " of avocados sold in the US between 2015 and 2018"
-                    ),
-                    className="header-description",
+                    children="Analyze wine data across countries, regions, and wine styles.",
+                    className="lead",
                 ),
             ],
-            className="header",
         ),
         html.Div(
+            className="row mb-4",
             children=[
                 html.Div(
+                    className="col-md-4",
                     children=[
-                        html.Div(children="Country", className="menu-title"),
+                        html.Label("Country", className="form-label fw-bold"),
                         dcc.Dropdown(
                             id="country-filter",
                             options=[
-                                {
-                                    "label": country, 
-                                    "value": country
-                                }
+                                {"label": country, "value": country}
                                 for country in countries
                             ],
                             value=countries[0],
                             clearable=False,
-                            className="dropdown",
+                            className="form-select",
                         ),
-                    ]
+                    ],
                 ),
                 html.Div(
+                    className="col-md-4",
                     children=[
-                        html.Div(children="Region", className="menu-title"),
+                        html.Label("Region", className="form-label fw-bold"),
                         dcc.Dropdown(
                             id="region-filter",
                             options=[
-                                {
-                                    "label": region,
-                                    "value": region,
-                                }
-                                for region in regions
+                                {"label": region, "value": region} for region in regions
                             ],
-                            value = regions[0],
+                            value=regions[0],
                             clearable=False,
-                            searchable=False,
-                            className="dropdown",
+                            className="form-select",
                         ),
                     ],
                 ),
                 html.Div(
+                    className="col-md-4",
                     children=[
-                        html.Div(children="Wine Style", className="menu-title"),
+                        html.Label("Wine Style", className="form-label fw-bold"),
                         dcc.Dropdown(
                             id="wine-style-filter",
                             options=[
-                                {
-                                    "label": wine_style,
-                                    "value": wine_style,
-                                }
+                                {"label": wine_style, "value": wine_style}
                                 for wine_style in wine_styles
                             ],
-                            value = wine_styles[0],
-                            searchable=False,
-                            className="dropdown",
+                            value=wine_styles[0],
+                            clearable=False,
+                            className="form-select",
                         ),
                     ],
                 ),
-
-                # html.Div(
-                #     children=[
-                #         html.Div(
-                #             children="Date Range", className="menu-title"
-                #         ),
-                #         dcc.DatePickerRange(
-                #             id="date-range",
-                #             min_date_allowed=data["Date"].min().date(),
-                #             max_date_allowed=data["Date"].max().date(),
-                #             start_date=data["Date"].min().date(),
-                #             end_date=data["Date"].max().date(),
-                #         ),
-                #     ]
-                # ),
             ],
-            className="menu",
         ),
         html.Div(
+            className="row",
             children=[
-                # html.Div(
-                #     children=dcc.Graph(
-                #         id="price-chart",
-                #         config={"displayModeBar": False},
-                #     ),
-                #     className="card",
-                # ),
                 html.Div(
-                    children=dcc.Graph(
-                        id="BTSA-chart",
-
-                    ),
-                    className="card",
+                    className="col-12",
+                    children=[
+                        dcc.Graph(
+                            id="BTSA-chart",
+                        ),
+                    ],
                 ),
             ],
-            className="wrapper",
         ),
-        html.Div(
-            children=[
-                html.Div(children="Wine search in Country", className="menu-title"),
-                    dcc.Dropdown(
-                        id="wine-search",
-                        options=[
-                            {
-                                "label": wine,
-                                "value": wine,
-                            }
-                            for wine in wines
-                        ],
-                        value = None,
-                        searchable=True,
-                        className="dropdown",
-                    ),
-                html.Div(id='wine-search-output')
-            ],
-        ),
-    ]
+    ],
 )
 
-@app.callback(
-    Output("wine-search", "options"),
-    Input("country-filter", "value")
-)
-def update_region_options(selected_country):
-    if selected_country:
-        df_of_one_region = region_selection_by_country(frame, selected_country)
-        wines = df_of_one_region['Name'].unique()
-        return [{"label": wine, "value": wine} for wine in wines]
-    return []
-
-@callback(
-    Output('wine-search-output', 'children'),
-    Input('wine-search', 'value')
-)
-def update_wine_search_output(value):
-    df = get_frame_by_wine_name(frame, value)
-    return f'{df["Name"], df["Rating"] ,df["Number of Ratings"], df["Region"], df["Winery"], df["Wine style"],
-    df["Alcohol content"], df["Grapes"] ,df["Food pairings"],
-    df["Bold"], df["Tannin"] ,df["Sweet"], df["Acidic"]}'
 
 @app.callback(
     Output("region-filter", "options"),
@@ -216,17 +133,19 @@ def update_wine_search_output(value):
 def update_region_options(selected_country):
     if selected_country:
         df_of_one_region = region_selection_by_country(frame, selected_country)
-        regions = df_of_one_region['Region'].str.split(' / ').apply(lambda x: x[1] if len(x) > 1 else None).unique()
+        regions = df_of_one_region['Region'].str.split(' / ').apply(
+            lambda x: x[1] if len(x) > 1 else None).unique()
         regions = [region for region in regions if pd.notna(region)]
         return [{"label": region, "value": region} for region in regions]
     return []
+
 
 @app.callback(
     Output("wine-style-filter", "options"),
     Input("country-filter", "value"),
     Input("region-filter", "value")
 )
-def update_wine_style_options(country, region ):
+def update_wine_style_options(country, region):
     if country:
         df_of_one_region_one_wine_style = wine_style_selection_by_country_and_region(frame, country, region)
         wine_styles = df_of_one_region_one_wine_style['Wine style'].unique()
@@ -234,7 +153,7 @@ def update_wine_style_options(country, region ):
         return [{"label": wine_style, "value": wine_style} for wine_style in wine_styles]
     return []
 
-# Callback to clear wine style dropdown when country is changed
+
 @app.callback(
     Output("region-filter", "value"),
     Output("wine-style-filter", "value"),
@@ -243,37 +162,15 @@ def update_wine_style_options(country, region ):
 def clear_wine_style_on_country_change(_):
     return None, None
 
+
 @app.callback(
-    # Output("price-chart", "figure"),
     Output("BTSA-chart", "figure"),
     Input("country-filter", "value"),
     Input("region-filter", "value"),
     Input("wine-style-filter", "value"),
 )
 def update_charts(country, region, wine_style):
-    
     filtered_data = df_selection_by_country_and_region_and_wine_style(frame, country, region, wine_style)
-
-    # price_chart_figure = {
-    #     "data": [
-    #         {
-    #             "x": filtered_data["Name"],
-    #             "y": filtered_data["Price"],
-    #             "type": "lines",
-    #             "hovertemplate": "$%{y:.2f}<extra></extra>",
-    #         },
-    #     ],
-    #     "layout": {
-    #         "title": {
-    #             "text": "Wine Price",
-    #             "x": 0.05,
-    #             "xanchor": "left",
-    #         },
-    #         "xaxis": {"fixedrange": True},
-    #         "yaxis": {"tickprefix": "$", "fixedrange": True},
-    #         "colorway": ["#17B897"],
-    #     },
-    # }
 
     BTSA_chart_figure = {
         'data': [
@@ -286,10 +183,8 @@ def update_charts(country, region, wine_style):
             'title': 'Wine Data Visualization'
         }
     }
-    return  BTSA_chart_figure #, price_chart_figure
+    return BTSA_chart_figure
 
-def get_app():
-    return app
 
 if __name__ == "__main__":
     app.run_server(debug=True)

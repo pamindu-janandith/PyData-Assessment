@@ -2,6 +2,7 @@ import pandas as pd
 from dash import Dash, Input, Output, dcc, html
 import os
 import sys
+import ast
 
 # Add the utils folder to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../utils/")))
@@ -141,7 +142,6 @@ app.layout = html.Div(
                     searchable=True,
                     className="dropdown",
                 ),
-                html.Div(id='wine-search-output')
             ],
         ),
 
@@ -151,6 +151,7 @@ app.layout = html.Div(
                 html.Div(
                     children=[
                         html.H5(
+                            id = "wine-name",
                             children="Fields Of Joy Shiraz 2014",
                             className="text-start mb-4",
                             style={"fontFamily": "Cursive"}
@@ -158,6 +159,7 @@ app.layout = html.Div(
                         html.Div(
                             children=[
                                 html.Img(
+                                    id = "wine-img",
                                     src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzJBQ2Oo7u2kRd3oh_COy9MQL1lBkE54lumw&s",
                                     className="img-fluid",
                                     alt="Wine Bottle Image",
@@ -170,51 +172,60 @@ app.layout = html.Div(
                                     children=[
                                         html.H6(children="Good with", className="text-start mt-4"),
                                         html.Div(
+                                            id = "food-pairings",
                                             children=[
-                                                html.Div(
-                                                    children=[
-                                                        html.Img(
-                                                            src="https://via.placeholder.com/50",
-                                                            className="rounded",
-                                                            alt="Beef",
-                                                            style={"width": "50px", "height": "50px"}
-                                                        ),
-                                                        html.P(children="Beef", className="text-center mt-2 small")
-                                                    ],
-                                                    className="d-inline-block text-center me-3"
-                                                ),
-                                                html.Div(
-                                                    children=[
-                                                        html.Img(
-                                                            src="https://via.placeholder.com/50",
-                                                            className="rounded",
-                                                            alt="Lamb",
-                                                            style={"width": "50px", "height": "50px"}
-                                                        ),
-                                                        html.P(children="Lamb", className="text-center mt-2 small")
-                                                    ],
-                                                    className="d-inline-block text-center me-3"
-                                                ),
-                                                html.Div(
-                                                    children=[
-                                                        html.Img(
-                                                            src="https://via.placeholder.com/50",
-                                                            className="rounded",
-                                                            alt="Venison",
-                                                            style={"width": "50px", "height": "50px"}
-                                                        ),
-                                                        html.P(children="Venison", className="text-center mt-2 small")
-                                                    ],
-                                                    className="d-inline-block text-center"
-                                                ),
+                                            #     html.Div(
+                                            #         children=[
+                                            #             html.Img(
+                                            #                 src="https://via.placeholder.com/50",
+                                            #                 className="rounded",
+                                            #                 alt="Beef",
+                                            #                 style={"width": "50px", "height": "50px"}
+                                            #             ),
+                                            #             html.P(
+                                            #                 children="Beef", 
+                                            #                 className="text-center mt-2 small")
+                                            #         ],
+                                            #         className="d-inline-block text-center me-3"
+                                            #     ),
+                                            #     html.Div(
+                                            #         children=[
+                                            #             html.Img(
+                                            #                 src="https://via.placeholder.com/50",
+                                            #                 className="rounded",
+                                            #                 alt="Lamb",
+                                            #                 style={"width": "50px", "height": "50px"}
+                                            #             ),
+                                            #             html.P(
+                                            #                 children="Lamb", 
+                                            #                 className="text-center mt-2 small")
+                                            #         ],
+                                            #         className="d-inline-block text-center me-3"
+                                            #     ),
+                                            #     html.Div(
+                                            #         children=[
+                                            #             html.Img(
+                                            #                 src="https://via.placeholder.com/50",
+                                            #                 className="rounded",
+                                            #                 alt="Venison",
+                                            #                 style={"width": "50px", "height": "50px"}
+                                            #             ),
+                                            #             html.P(
+                                            #                 children="Venison", 
+                                            #                 className="text-center mt-2 small")
+                                            #         ],
+                                            #         className="d-inline-block text-center"
+                                            #     ),
                                             ],
                                             className="d-flex justify-content-start mt-3"
                                         ),
                                         html.P(
+                                            id = "wine-alcohol-content",
                                             children="Alcohol Content: 13.8%",
                                             className="mt-4 mb-1 fw-bold"
                                         ),
                                         html.P(
+                                            id = "wine-winery",
                                             children="Winery: Two Hands",
                                             className="fw-bold"
                                         )
@@ -253,12 +264,47 @@ def update_region_options(selected_country):
     return []
 
 @app.callback(
-    Output('wine-search-output', 'children'),
-    Input('wine-search', 'value')
+    Output("wine-name", "children"),
+    Output("food-pairings", "children"),
+    Output("wine-alcohol-content", "children"),
+    Output("wine-winery", "children"),
+    Input("wine-search", "value")
 )
 def update_wine_search_output(value):
-    df = get_frame_by_wine_name(frame, value)
-    return f'{df["Name"], df["Rating"], df["Number of Ratings"], df["Region"], df["Winery"], df["Wine style"], df["Alcohol content"], df["Grapes"], df["Food pairings"], df["Bold"], df["Tannin"], df["Sweet"], df["Acidic"]}'
+    wine_name=""
+    food_pairings_div = []
+    wine_alcohol_content=""
+    wine_winery ="" 
+
+    if value:
+        df = get_frame_by_wine_name(frame, value)
+        wine_name = df["Name"].iloc[0] if not df.empty else "Unknown"
+
+        wine_food_pairings = df["Food pairings"].iloc[0] if not df.empty else []
+        food_pairings_list = ast.literal_eval(wine_food_pairings)
+        for food in food_pairings_list:
+            food_pairings_div.append(
+                html.Div(
+                    children=[
+                        html.Img(
+                            src="https://via.placeholder.com/50",
+                            className="rounded",
+                            alt=str(food),
+                            style={"width": "50px", "height": "50px"}
+                        ),
+                        html.P(
+                            children=str(food),
+                            className="text-center mt-2 small"
+                        )
+                    ],
+                    className="d-inline-block text-center me-3"
+                )
+            )
+            
+        wine_alcohol_content = f"Alcohol content: {df['Alcohol content'].iloc[0]}" if not df.empty else ""
+        wine_winery = df["Winery"].iloc[0] if not df.empty else "Unknown Winery"
+        # 
+    return wine_name,food_pairings_div, wine_alcohol_content, wine_winery
 
 @app.callback(
     Output("region-filter", "options"),

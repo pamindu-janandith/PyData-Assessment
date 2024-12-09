@@ -146,7 +146,92 @@ app.layout = html.Div(
         ),
 
     #Single wine view starts 
-
+    html.Div(
+            children=[
+                html.Div(
+                    children=[
+                        html.H5(
+                            children="Fields Of Joy Shiraz 2014",
+                            className="text-start mb-4",
+                            style={"fontFamily": "Cursive"}
+                        ),
+                        html.Div(
+                            children=[
+                                html.Img(
+                                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzJBQ2Oo7u2kRd3oh_COy9MQL1lBkE54lumw&s",
+                                    className="img-fluid",
+                                    alt="Wine Bottle Image",
+                                    style={
+                                        "maxWidth": "200px",
+                                        "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)"
+                                    }
+                                ),
+                                html.Div(
+                                    children=[
+                                        html.H6(children="Good with", className="text-start mt-4"),
+                                        html.Div(
+                                            children=[
+                                                html.Div(
+                                                    children=[
+                                                        html.Img(
+                                                            src="https://via.placeholder.com/50",
+                                                            className="rounded",
+                                                            alt="Beef",
+                                                            style={"width": "50px", "height": "50px"}
+                                                        ),
+                                                        html.P(children="Beef", className="text-center mt-2 small")
+                                                    ],
+                                                    className="d-inline-block text-center me-3"
+                                                ),
+                                                html.Div(
+                                                    children=[
+                                                        html.Img(
+                                                            src="https://via.placeholder.com/50",
+                                                            className="rounded",
+                                                            alt="Lamb",
+                                                            style={"width": "50px", "height": "50px"}
+                                                        ),
+                                                        html.P(children="Lamb", className="text-center mt-2 small")
+                                                    ],
+                                                    className="d-inline-block text-center me-3"
+                                                ),
+                                                html.Div(
+                                                    children=[
+                                                        html.Img(
+                                                            src="https://via.placeholder.com/50",
+                                                            className="rounded",
+                                                            alt="Venison",
+                                                            style={"width": "50px", "height": "50px"}
+                                                        ),
+                                                        html.P(children="Venison", className="text-center mt-2 small")
+                                                    ],
+                                                    className="d-inline-block text-center"
+                                                ),
+                                            ],
+                                            className="d-flex justify-content-start mt-3"
+                                        ),
+                                        html.P(
+                                            children="Alcohol Content: 13.8%",
+                                            className="mt-4 mb-1 fw-bold"
+                                        ),
+                                        html.P(
+                                            children="Winery: Two Hands",
+                                            className="fw-bold"
+                                        )
+                                    ],
+                                    className="ms-4"
+                                )
+                            ],
+                            className="d-flex align-items-center"
+                        )
+                    ],
+                    className="p-4 bg-white rounded",
+                    style={"border": "1px solid #ccc"}
+                )
+            ],
+            className="d-flex justify-content-center align-items-center vh-100",
+            style={"backgroundColor": "white"}
+        )
 
     #Single wine view ends 
 

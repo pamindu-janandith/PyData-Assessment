@@ -2,5 +2,6 @@
 
 1) To run
 
-    Run   -> app_package/web_app/app.py
-    Visit -> http://127.0.0.1:8050/ 
+    Run           -> app_package/web_app/app.py
+    Visit         -> http://127.0.0.1:8050/ 
+    Documentation -> app_package/web_app/Functions.ipynb

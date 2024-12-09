@@ -15,9 +15,4 @@ def get_data_frame():
 
     return frame
 
-
-def region_selection_by_country(frame, country):
-    df = pd.DataFrame(frame)
-    df = df[df['Country'] == "USA"]
-    return df
     

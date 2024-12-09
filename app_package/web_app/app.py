@@ -145,6 +145,11 @@ app.layout = html.Div(
             ],
         ),
 
+    #Single wine view starts 
+
+
+    #Single wine view ends 
+
     ],
 
          

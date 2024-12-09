@@ -128,27 +128,27 @@ app.layout = html.Div(
                 ),
             ],
         ),
-
         html.Div(
             children=[
                 html.Div(children="Wine search in Country", className="menu-title"),
-                    dcc.Dropdown(
-                        id="wine-search",
-                        options=[
-                            {
-                                "label": wine,
-                                "value": wine,
-                            }
-                            for wine in wines
-                        ],
-                        value = None,
-                        searchable=True,
-                        className="dropdown",
-                    ),
+                dcc.Dropdown(
+                    id="wine-search",
+                    options=[
+                        {"label": wine, "value": wine}
+                        for wine in wines
+                    ],
+                    value=None,
+                    searchable=True,
+                    className="dropdown",
+                ),
                 html.Div(id='wine-search-output')
             ],
         ),
+
     ],
+
+         
+
 )
 
 @app.callback(
@@ -168,9 +168,7 @@ def update_region_options(selected_country):
 )
 def update_wine_search_output(value):
     df = get_frame_by_wine_name(frame, value)
-    return f'{df["Name"], df["Rating"] ,df["Number of Ratings"], df["Region"], df["Winery"], df["Wine style"],
-    df["Alcohol content"], df["Grapes"] ,df["Food pairings"],
-    df["Bold"], df["Tannin"] ,df["Sweet"], df["Acidic"]}'
+    return f'{df["Name"], df["Rating"], df["Number of Ratings"], df["Region"], df["Winery"], df["Wine style"], df["Alcohol content"], df["Grapes"], df["Food pairings"], df["Bold"], df["Tannin"], df["Sweet"], df["Acidic"]}'
 
 @app.callback(
     Output("region-filter", "options"),
@@ -185,7 +183,6 @@ def update_region_options(selected_country):
         return [{"label": region, "value": region} for region in regions]
     return []
 
-
 @app.callback(
     Output("wine-style-filter", "options"),
     Input("country-filter", "value"),
@@ -199,7 +196,6 @@ def update_wine_style_options(country, region):
         return [{"label": wine_style, "value": wine_style} for wine_style in wine_styles]
     return []
 
-
 @app.callback(
     Output("region-filter", "value"),
     Output("wine-style-filter", "value"),
@@ -207,7 +203,6 @@ def update_wine_style_options(country, region):
 )
 def clear_wine_style_on_country_change(_):
     return None, None
-
 
 @app.callback(
     Output("BTSA-chart", "figure"),
@@ -230,7 +225,6 @@ def update_charts(country, region, wine_style):
         }
     }
     return BTSA_chart_figure
-
 
 if __name__ == "__main__":
     app.run_server(debug=True)
